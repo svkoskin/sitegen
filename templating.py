@@ -1,6 +1,7 @@
 import errno
 import os
 import shutil
+import time
 
 import jinja2
 
@@ -30,6 +31,7 @@ class ProjectTemplater:
         )
 
     def run(self):
+        then = time.monotonic()
         # Make build dir
         try:
             os.makedirs(self.config.build_dir)
@@ -37,6 +39,9 @@ class ProjectTemplater:
             # Catch EEXIST and continue
             if exc.errno != errno.EEXIST:
                 raise FatalError("Unable to create target directory: {}".format(os.strerror(exc.errno)))
+
+        if len(os.listdir(self.config.build_dir)) > 0:
+            raise FatalError("Target directory not empty")
 
         template_names = self.jinja_env.list_templates()
 
@@ -69,6 +74,10 @@ class ProjectTemplater:
                     shutil.copy(src_path, dst_path)
 
                     print("Copied '{}'".format(f))
+
+        now = time.monotonic()
+        print("Finished in {:.3f} ms!".format(now - then))
+
 
 def should_ignore_name(f):
     # TODO: Extend.
