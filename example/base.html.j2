@@ -1,0 +1,22 @@
+<!doctype html>
+<html>
+  <head>
+    {% block head %}
+    <title>{{ site_name }}</title>
+    {% endblock %}
+  </head>
+  <body>
+    {% block navigation %}
+    <ul>
+      <li>Room for navigation</li>
+    </ul>
+    {% endblock %}
+
+    {% block content %}
+    {% endblock %}
+
+    {% block footer %}
+    <p>Common footer. Have a nice day.</p>
+    {% endblock %}
+  </body>
+</html>
