@@ -1,5 +1,6 @@
 import errno
 import os
+import shutil
 
 import jinja2
 
@@ -37,7 +38,9 @@ class ProjectTemplater:
             if exc.errno != errno.EEXIST:
                 raise FatalError("Unable to create target directory: {}".format(os.strerror(exc.errno)))
 
-        for template_name in self.jinja_env.list_templates():
+        template_names = self.jinja_env.list_templates()
+
+        for template_name in template_names:
             template = self.jinja_env.get_template(template_name)
 
             if template.filename is not None:
@@ -54,3 +57,19 @@ class ProjectTemplater:
 
                     with open(target_path, 'w') as target_file:
                         target_file.write(template.render())
+
+                    print("Rendered '{}'".format(target_name))
+
+        # Look for files that were not loaded by Jinja and copy them as they are.
+        for root, dirs, files in os.walk(self.config.root_dir):
+            for f in files:
+                if not f.endswith(JINJA2_FILE_ENDING) and not should_ignore_name(f):
+                    src_path = os.path.join(root, f)
+                    dst_path = os.path.join(self.config.build_dir, f)
+                    shutil.copy(src_path, dst_path)
+
+                    print("Copied '{}'".format(f))
+
+def should_ignore_name(f):
+    # TODO: Extend.
+    return f.endswith("~")
